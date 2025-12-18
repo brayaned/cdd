@@ -1,3 +1,331 @@
+Listo. Te dejo un CRUD completo (Spring Boot / JPA) para el catálogo PAÍS – PROBABILIDAD usando las entidades que armamos aquí:
+
+CDDLAFT_PERFIL_RIESGO_PAIS_PROBABILIDAD (PK compuesta: TIPO_PAIS + CODIGO_PAIS)
+
+CDDLAFT_PERFIL_RIESGO_PAIS_PROBABILIDAD_AUDITORIA (PK secuencial)
+
+y para resolver el descripcion del país: CDDLAFT_PERFIL_RIESGO_PAIS
+
+
+Incluye manejo de:
+
+FECHA_CREACION, USUARIO_CREACION
+
+FECHA_ULTIMA_MODIFICACION, USUARIO_ULTIMA_MODIFICACION
+
+Upsert (POST sirve como PUT)
+
+Auditoría automática en create/update/delete
+
+
+
+---
+
+1) DTOs (request/response)
+
+package com.santander.bnc.bsn023.bncbsn023siarbackendj.app.dto;
+
+import java.math.BigDecimal;
+import java.time.LocalDate;
+
+public class CatalogoPaisProbabilidadUpsertRequest {
+    private String tipo;          // -> TIPO_PAIS
+    private String id;            // -> CODIGO_PAIS
+    private BigDecimal riesgo;    // -> PROBABILIDAD_RIESGO
+    private LocalDate fechaVigencia;
+
+    // getters/setters
+}
+
+package com.santander.bnc.bsn023.bncbsn023siarbackendj.app.dto;
+
+import java.math.BigDecimal;
+import java.time.LocalDate;
+
+public class CatalogoItemResponse {
+    private String id;              // CODIGO_PAIS
+    private String nombre;          // normalmente igual a id (o el que uses en front)
+    private String descripcion;     // viene de CDDLAFT_PERFIL_RIESGO_PAIS.DESCRIPCION_PAIS
+    private BigDecimal riesgo;      // PROBABILIDAD_RIESGO
+    private LocalDate fechaVigencia;
+    private String tipo;            // TIPO_PAIS
+
+    // getters/setters
+}
+
+
+---
+
+2) Repositories
+
+package com.santander.bnc.bsn023.bncbsn023siarbackendj.app.repository;
+
+import com.santander.bnc.bsn023.bncbsn023siarbackendj.app.entity.PerfilRiesgoPaisProbabilidadEntity;
+import com.santander.bnc.bsn023.bncbsn023siarbackendj.app.entity.PerfilRiesgoPaisProbabilidadId;
+import org.springframework.data.jpa.repository.JpaRepository;
+
+import java.util.List;
+
+public interface PerfilRiesgoPaisProbabilidadRepository
+        extends JpaRepository<PerfilRiesgoPaisProbabilidadEntity, PerfilRiesgoPaisProbabilidadId> {
+
+    List<PerfilRiesgoPaisProbabilidadEntity> findByTipoPais(String tipoPais);
+}
+
+package com.santander.bnc.bsn023.bncbsn023siarbackendj.app.repository;
+
+import com.santander.bnc.bsn023.bncbsn023siarbackendj.app.entity.PerfilRiesgoPaisEntity;
+import org.springframework.data.jpa.repository.JpaRepository;
+
+public interface PerfilRiesgoPaisRepository extends JpaRepository<PerfilRiesgoPaisEntity, String> {
+}
+
+> Auditoría (ojo: aquí conviene que el @Id sea @GeneratedValue con sequence; si tu tabla ya tiene sequence, la configuras en la Entity).
+
+
+
+package com.santander.bnc.bsn023.bncbsn023siarbackendj.app.repository;
+
+import com.santander.bnc.bsn023.bncbsn023siarbackendj.app.entity.PerfilRiesgoPaisProbabilidadAuditoriaEntity;
+import org.springframework.data.jpa.repository.JpaRepository;
+
+public interface PerfilRiesgoPaisProbabilidadAuditoriaRepository
+        extends JpaRepository<PerfilRiesgoPaisProbabilidadAuditoriaEntity, Long> {
+}
+
+
+---
+
+3) Service (CRUD + auditoría + campos de control)
+
+package com.santander.bnc.bsn023.bncbsn023siarbackendj.app.service;
+
+import com.santander.bnc.bsn023.bncbsn023siarbackendj.app.dto.CatalogoItemResponse;
+import com.santander.bnc.bsn023.bncbsn023siarbackendj.app.dto.CatalogoPaisProbabilidadUpsertRequest;
+import com.santander.bnc.bsn023.bncbsn023siarbackendj.app.entity.*;
+import com.santander.bnc.bsn023.bncbsn023siarbackendj.app.repository.*;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.time.LocalDateTime;
+import java.util.List;
+
+@Service
+public class CatalogoPaisProbabilidadService {
+
+    private final PerfilRiesgoPaisProbabilidadRepository probRepo;
+    private final PerfilRiesgoPaisRepository paisRepo;
+    private final PerfilRiesgoPaisProbabilidadAuditoriaRepository auditRepo;
+
+    public CatalogoPaisProbabilidadService(
+            PerfilRiesgoPaisProbabilidadRepository probRepo,
+            PerfilRiesgoPaisRepository paisRepo,
+            PerfilRiesgoPaisProbabilidadAuditoriaRepository auditRepo
+    ) {
+        this.probRepo = probRepo;
+        this.paisRepo = paisRepo;
+        this.auditRepo = auditRepo;
+    }
+
+    public List<CatalogoItemResponse> listar(String tipoPais) {
+        var rows = (tipoPais == null || tipoPais.isBlank())
+                ? probRepo.findAll()
+                : probRepo.findByTipoPais(tipoPais);
+
+        return rows.stream().map(this::toResponse).toList();
+    }
+
+    @Transactional
+    public CatalogoItemResponse upsert(CatalogoPaisProbabilidadUpsertRequest req) {
+        if (req.getTipo() == null || req.getTipo().isBlank())
+            throw new IllegalArgumentException("tipo (TIPO_PAIS) es requerido");
+        if (req.getId() == null || req.getId().isBlank())
+            throw new IllegalArgumentException("id (CODIGO_PAIS) es requerido");
+        if (req.getRiesgo() == null)
+            throw new IllegalArgumentException("riesgo (PROBABILIDAD_RIESGO) es requerido");
+        if (req.getFechaVigencia() == null)
+            throw new IllegalArgumentException("fechaVigencia (FECHA_VIGENCIA) es requerido");
+
+        var now = LocalDateTime.now();
+        var user = currentUser();
+
+        var id = new PerfilRiesgoPaisProbabilidadId();
+        id.tipoPais = req.getTipo();
+        id.codigoPais = req.getId();
+
+        var existingOpt = probRepo.findById(id);
+
+        PerfilRiesgoPaisProbabilidadEntity entity;
+        if (existingOpt.isPresent()) {
+            entity = existingOpt.get();
+            entity.setProbabilidadRiesgo(req.getRiesgo());
+            entity.setFechaVigencia(req.getFechaVigencia());
+            entity.setFechaUltimaModificacion(now);
+            entity.setUsuarioUltimaModificacion(user);
+
+            // auditoría snapshot (update)
+            auditRepo.save(snapshotAudit(entity));
+
+        } else {
+            entity = new PerfilRiesgoPaisProbabilidadEntity();
+            entity.setTipoPais(req.getTipo());
+            entity.setCodigoPais(req.getId());
+            entity.setProbabilidadRiesgo(req.getRiesgo());
+            entity.setFechaVigencia(req.getFechaVigencia());
+
+            entity.setFechaCreacion(now);
+            entity.setUsuarioCreacion(user);
+
+            // en creación, normalmente no hay ultima_modificacion
+            entity.setFechaUltimaModificacion(null);
+            entity.setUsuarioUltimaModificacion(null);
+
+            probRepo.save(entity);
+
+            // auditoría snapshot (create)
+            auditRepo.save(snapshotAudit(entity));
+        }
+
+        // si era update y no estaba guardado explícitamente, JPA lo flush en commit
+        return toResponse(entity);
+    }
+
+    @Transactional
+    public void eliminar(String tipoPais, String codigoPais) {
+        var id = new PerfilRiesgoPaisProbabilidadId();
+        id.tipoPais = tipoPais;
+        id.codigoPais = codigoPais;
+
+        var entity = probRepo.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("No existe registro para tipo=" + tipoPais + " id=" + codigoPais));
+
+        // para auditoría de borrado: guardo snapshot con ultima modificación = ahora
+        var now = LocalDateTime.now();
+        var user = currentUser();
+        entity.setFechaUltimaModificacion(now);
+        entity.setUsuarioUltimaModificacion(user);
+        auditRepo.save(snapshotAudit(entity));
+
+        probRepo.delete(entity);
+    }
+
+    private CatalogoItemResponse toResponse(PerfilRiesgoPaisProbabilidadEntity e) {
+        var resp = new CatalogoItemResponse();
+        resp.setTipo(e.getTipoPais());
+        resp.setId(e.getCodigoPais());
+        resp.setNombre(e.getCodigoPais());
+
+        var paisDesc = paisRepo.findById(e.getCodigoPais())
+                .map(PerfilRiesgoPaisEntity::getDescripcionPais)
+                .orElse(null);
+
+        resp.setDescripcion(paisDesc);
+        resp.setRiesgo(e.getProbabilidadRiesgo());
+        resp.setFechaVigencia(e.getFechaVigencia());
+        return resp;
+    }
+
+    private PerfilRiesgoPaisProbabilidadAuditoriaEntity snapshotAudit(PerfilRiesgoPaisProbabilidadEntity e) {
+        var a = new PerfilRiesgoPaisProbabilidadAuditoriaEntity();
+
+        // si tu auditoría tiene @GeneratedValue, NO seteas id aquí
+        a.setTipoPais(e.getTipoPais());
+        a.setCodigoPais(e.getCodigoPais());
+        a.setProbabilidadRiesgo(e.getProbabilidadRiesgo());
+        a.setFechaVigencia(e.getFechaVigencia());
+
+        a.setFechaCreacion(e.getFechaCreacion());
+        a.setUsuarioCreacion(e.getUsuarioCreacion());
+        a.setFechaUltimaModificacion(e.getFechaUltimaModificacion());
+        a.setUsuarioUltimaModificacion(e.getUsuarioUltimaModificacion());
+
+        return a;
+    }
+
+    private String currentUser() {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth == null || auth.getName() == null) return "SYSTEM";
+        return auth.getName();
+    }
+}
+
+
+---
+
+4) Controller REST
+
+package com.santander.bnc.bsn023.bncbsn023siarbackendj.app.controller;
+
+import com.santander.bnc.bsn023.bncbsn023siarbackendj.app.dto.CatalogoItemResponse;
+import com.santander.bnc.bsn023.bncbsn023siarbackendj.app.dto.CatalogoPaisProbabilidadUpsertRequest;
+import com.santander.bnc.bsn023.bncbsn023siarbackendj.app.service.CatalogoPaisProbabilidadService;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+
+@RestController
+@RequestMapping("/catalogos/pais-probabilidad")
+public class CatalogoPaisProbabilidadController {
+
+    private final CatalogoPaisProbabilidadService service;
+
+    public CatalogoPaisProbabilidadController(CatalogoPaisProbabilidadService service) {
+        this.service = service;
+    }
+
+    // GET /catalogos/pais-probabilidad?tipo=UBO  (opcional)
+    @GetMapping
+    public ResponseEntity<List<CatalogoItemResponse>> listar(@RequestParam(name = "tipo", required = false) String tipo) {
+        return ResponseEntity.ok(service.listar(tipo));
+    }
+
+    // POST (sirve como PUT / upsert)
+    @PostMapping
+    public ResponseEntity<CatalogoItemResponse> upsert(@RequestBody CatalogoPaisProbabilidadUpsertRequest req) {
+        return ResponseEntity.ok(service.upsert(req));
+    }
+
+    // DELETE /catalogos/pais-probabilidad/{tipo}/{id}
+    @DeleteMapping("/{tipo}/{id}")
+    public ResponseEntity<Void> eliminar(@PathVariable("tipo") String tipo, @PathVariable("id") String id) {
+        service.eliminar(tipo, id);
+        return ResponseEntity.noContent().build();
+    }
+}
+
+
+---
+
+5) Nota importante sobre la auditoría (ID secuencial)
+
+Tu tabla auditoría tiene ID_CONSECUTIVO_... tipo NUMBER(38,0). Lo ideal es en la entity auditoría:
+
+@Id
+@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_PAIS_PROB_AUD")
+@SequenceGenerator(
+    name = "SEQ_PAIS_PROB_AUD",
+    sequenceName = "CDDLAFT.SEQ_PAIS_PROB_AUD", // AJUSTA AL NOMBRE REAL
+    allocationSize = 1
+)
+@Column(name = "ID_CONSECUTIVO_PAIS_PROBABILIDAD_AUDITORIA", nullable = false)
+private Long id;
+
+Si en tu esquema el nombre del sequence es otro, me lo pasas y lo dejo exacto.
+
+
+---
+
+¿Siguiente paso?
+
+Con esto ya tienes el controller completo para “País Probabilidad” (incluye auditoría y campos de control).
+Si me confirmas cuál catálogo quieres que sea el siguiente (Industria, Ocupación, Producto, Canal Onboarding, Ciudad/Depto, etc.), lo replico igual con el mismo patrón, respetando los campos de creación/modificación y la auditoría correspondiente.
+
+
+--aquí--
+
 # cdd
 
 Lista url SIAR (CDD): 
