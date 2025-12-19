@@ -1,0 +1,35 @@
+// A partir de este DTO crea un request y response (el response solo para indicar que la operacion de guardado se realizo correctamente)
+// Ten en cuenta realizar el mapper para el request con el dto y lo mismo para la respuesta
+// Crea el controlador RiesgoController si no existe con las peticiones rest para guardar y consultar esta informacion que esta en el DTO
+// Crea el servicio igualmente para las mismas operaciones, no es necesario realizar la logica completa del service necesitamos la estructura
+
+public class RiesgoPersonaNaturalDTO {
+
+    private BigDecimal industria;
+    private BigDecimal ocupacion;
+    private BigDecimal productos;
+    private BigDecimal paisResidencia;
+    private BigDecimal canalOnboarding;
+    private BigDecimal ciudad;
+
+}
+
+// A partir de este DTO crea un request y response (el response solo para indicar que la operacion de guardado se realizo correctamente)
+// Ten en cuenta realizar el mapper para el request con el dto y lo mismo para la respuesta
+// Crea el controlador RiesgoController si no existe con las peticiones rest para guardar y consultar esta informacion que esta en el DTO
+// Crea el servicio igualmente para las mismas operaciones, no es necesario realizar la logica completa del service necesitamos la estructura
+
+public class RiesgoPersonaJuridicaDTO {
+
+    private BigDecimal industria;
+    private BigDecimal productos;
+    private BigDecimal paisResidenciaUbos;
+    private BigDecimal paisResidenciaFiscal;
+    private BigDecimal paisIncorporacion;
+    private BigDecimal estructuraPropiedadCompleja;
+    private BigDecimal tipoPersonaJuridica;
+    private BigDecimal canalOnboarding;
+    private BigDecimal presenciaGrupo;
+    private BigDecimal exposicionPaisesProhibidos;
+}
+
