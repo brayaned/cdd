@@ -1,0 +1,29 @@
+// A partir de esta clase crea un request,response y dto (el response solo para indicar que la operacion de guardado se realizo correctamente)
+// Ten en cuenta realizar el mapper para el request con el dto y lo mismo para la respuesta
+// Crea el controlador RiesgoTotalController si no existe con la peticion para consultar esta informacion que esta en el DTO
+// Crea el servicio igualmente para las mismas operaciones, no es necesario realizar la logica completa del service necesitamos la estructura
+public class ResultadoRiesgoDTO {
+
+    private BigInteger id;
+    private Double documento;
+    private String tipoDocumento;
+    private String nombre;
+    private String tipoPersona;
+    private String producto;
+    private LocalDate fecha;
+    private String resultadoRiesgo;
+    private BigDecimal nivelRiesgo;
+
+}
+
+// A partir de esta clase crea un request,response y dto (el response solo para indicar que la operacion de guardado se realizo correctamente)
+// Ten en cuenta realizar el mapper para el request con el dto y lo mismo para la respuesta
+// Crea el controlador RiesgoTotalController si no existe con la peticion para consultar esta informacion que esta en el DTO
+// Crea el servicio igualmente para las mismas operaciones, no es necesario realizar la logica completa del service necesitamos la estructura
+public class DetalleResultadoRiesgoDTO {
+
+    private String catalogo;
+    private String valor;
+    private BigDecimal riesgo;
+
+}
