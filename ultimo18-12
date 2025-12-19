@@ -1,0 +1,241 @@
+Perfecto, vamos paso a paso y sin ruido, porque aquí hay varios conceptos mezclados y ya tienes casi todo listo.
+
+
+---
+
+✅ Contexto (lo que YA tienes)
+
+✔ Spring Boot
+
+✔ DataSource configurado vía @Configuration @Bean
+
+✔ ID String (no es el problema)
+
+✔ Quieres SQL puro, editable cuando quieras
+
+✔ Solo guardar un catálogo
+
+❌ NO usar JPA Repository
+
+❌ NO auditoría
+
+
+👉 Entonces NO necesitas JpaRepository, ni clase Id, ni @Entity siquiera para este caso.
+
+
+---
+
+🔑 Respuesta corta a tu última pregunta
+
+> ¿Ya tengo configurado el datasource, solo agrego esa dependencia?
+
+
+
+👉 Sí. SOLO agrega esta dependencia (si no la tienes):
+
+<!-- JDBC básico de Spring -->
+<dependency>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-jdbc</artifactId>
+</dependency>
+
+🚫 NO necesitas:
+
+spring-boot-starter-data-jpa
+
+Hibernate
+
+JpaRepository
+
+@IdClass
+
+Clases ID
+
+
+
+---
+
+🧠 Qué vamos a usar en lugar de JPA
+
+👉 JdbcTemplate o NamedParameterJdbcTemplate
+
+✔ Ventajas:
+
+SQL 100% controlado por ti
+
+Fácil de modificar
+
+Ideal para catálogos
+
+Muy usado en banca
+
+
+
+---
+
+🧱 Ejemplo real: Repository con SQL puro
+
+📦 Paquete sugerido
+
+package com.santander.bnc.bsn023.bncbsn023siarbackendj.app.repository;
+
+
+---
+
+✅ Repository usando JdbcTemplate
+
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.stereotype.Repository;
+
+@Repository
+public class CatalogoRepository {
+
+    private final JdbcTemplate jdbcTemplate;
+
+    public CatalogoRepository(JdbcTemplate jdbcTemplate) {
+        this.jdbcTemplate = jdbcTemplate;
+    }
+
+    public int guardarCatalogo(
+            String codigo,
+            String descripcion
+    ) {
+
+        String sql = """
+            INSERT INTO CDDLAFT.CDDLAFT_CATALOGOS
+            (CODIGO, DESCRIPCION)
+            VALUES (?, ?)
+        """;
+
+        return jdbcTemplate.update(
+                sql,
+                codigo,
+                descripcion
+        );
+    }
+}
+
+✔ El SQL lo puedes editar cuando quieras
+✔ Retorna filas afectadas
+✔ Cero JPA
+
+
+---
+
+🔁 Si quieres SQL aún más limpio (recomendado)
+
+Usando NamedParameterJdbcTemplate
+
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
+import org.springframework.stereotype.Repository;
+
+import java.util.HashMap;
+import java.util.Map;
+
+@Repository
+public class CatalogoRepository {
+
+    private final NamedParameterJdbcTemplate jdbcTemplate;
+
+    public CatalogoRepository(NamedParameterJdbcTemplate jdbcTemplate) {
+        this.jdbcTemplate = jdbcTemplate;
+    }
+
+    public int guardarCatalogo(String codigo, String descripcion) {
+
+        String sql = """
+            INSERT INTO CDDLAFT.CDDLAFT_CATALOGOS
+            (CODIGO, DESCRIPCION)
+            VALUES (:codigo, :descripcion)
+        """;
+
+        Map<String, Object> params = new HashMap<>();
+        params.put("codigo", codigo);
+        params.put("descripcion", descripcion);
+
+        return jdbcTemplate.update(sql, params);
+    }
+}
+
+✔ Mucho más legible
+✔ Ideal cuando el SQL crece
+
+
+---
+
+🧪 Service (opcional, pero recomendado)
+
+import org.springframework.stereotype.Service;
+
+@Service
+public class CatalogoService {
+
+    private final CatalogoRepository repository;
+
+    public CatalogoService(CatalogoRepository repository) {
+        this.repository = repository;
+    }
+
+    public void crearCatalogo(String codigo, String descripcion) {
+        repository.guardarCatalogo(codigo, descripcion);
+    }
+}
+
+
+---
+
+🚫 Qué NO hacer (y por qué te salió el error)
+
+❌ public interface XRepository extends JpaRepository<Entity, String>
+
+Eso obliga a JPA
+
+Exige un @Id
+
+Exige entidad bien mapeada
+
+Exige contexto Hibernate
+
+
+👉 Si usas SQL puro, NO heredes de JpaRepository
+
+
+---
+
+🏁 Resumen claro
+
+✔ Sí, solo agrega:
+
+spring-boot-starter-jdbc
+
+✔ Usa:
+
+JdbcTemplate o NamedParameterJdbcTemplate
+
+
+❌ No uses:
+
+JpaRepository
+
+@IdClass
+
+JPA para catálogos simples
+
+
+
+---
+
+Si quieres, en el siguiente mensaje puedo:
+
+🔹 Adaptar el SQL a Oracle (MERGE / SEQUENCE)
+
+🔹 Hacer UPDATE / DELETE
+
+🔹 Externalizar el SQL a .sql
+
+🔹 Manejar errores SQL bancarios (DataAccessException)
+
+🔹 Hacer batch insert
+
+
+Dime y lo dejamos nivel banco 💼✔️
