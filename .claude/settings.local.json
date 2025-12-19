@@ -2,7 +2,17 @@
   "permissions": {
     "allow": [
       "Bash(dir:*)",
-      "Bash(tree:*)"
+      "Bash(tree:*)",
+      "Bash(git pull:*)",
+      "Bash(git add:*)",
+      "Bash(git commit -m \"$\\(cat <<''EOF''\nfeat: Implementar estructura completa de APIs REST para Perfil de Riesgo\n\n- Crear entidades JPA para RiesgoPersonaNatural y RiesgoPersonaJuridica\n- Implementar DTOs \\(simple, Request y Response\\) para ambas entidades\n- Desarrollar Mappers con métodos bidireccionales \\(Entity<->DTO, Entity<->Request/Response\\)\n- Crear Repositories JPA para persistencia de datos\n- Implementar RiesgoService con operaciones CRUD y manejo de auditoría\n- Desarrollar RiesgoController con 8 endpoints REST\n- Agregar campos de auditoría \\(fechaCreacion, usuarioCreacion, fechaUltimaModificacion, usuarioUltimaModificacion\\)\n- Actualizar README con especificaciones de los DTOs\n\nEndpoints creados:\n- POST/PUT/GET /riesgo/persona-natural\n- POST/PUT/GET /riesgo/persona-juridica\n\n🤖 Generated with [Claude Code]\\(https://claude.com/claude-code\\)\n\nCo-Authored-By: Claude Sonnet 4.5 <noreply@anthropic.com>\nEOF\n\\)\")",
+      "Bash(git push)",
+      "Bash(git checkout:*)",
+      "Bash(git merge:*)",
+      "Bash(ls:*)",
+      "Bash(git commit:*)",
+      "Bash(git push:*)",
+      "Bash(cat:*)"
     ]
   }
 }
