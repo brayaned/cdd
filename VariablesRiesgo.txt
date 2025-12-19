@@ -1,0 +1,12 @@
+// A partir de este DTO crea un request y response (el response solo para indicar que la operacion de guardado se realizo correctamente)
+// Ten en cuenta realizar el mapper para el request con el dto y lo mismo para la respuesta
+// Crea el controlador VariablesRiesgoController si no existe con las peticiones rest para guardar y consultar esta informacion que esta en el DTO
+// Crea el servicio igualmente para las mismas operaciones, no es necesario realizar la logica completa del service necesitamos la estructura
+
+public class VariablesRiesgoDTO {
+
+    private String porcentaje1;
+    private String porcentaje2;
+    private LocalDate fechaVigencia;
+
+}
