@@ -1,0 +1,15 @@
+// A partir de esta clase crea un request,response y dto (el response solo para indicar que la operacion de guardado se realizo correctamente)
+// Ten en cuenta realizar el mapper para el request con el dto y lo mismo para la respuesta
+// Crea el controlador RiesgoTotalController si no existe con las peticiones rest para guardar, consultar, actualizar y eliminar  esta informacion que esta en el DTO
+// Crea el servicio igualmente para las mismas operaciones, no es necesario realizar la logica completa del service necesitamos la estructura
+
+public class RiesgoTotalDTO {
+    private BigInteger id;
+    private String nombre;
+    private String descripcion;
+    private String riesgo;
+    private LocalDate fechaVigencia;
+    private BigInteger limInf;
+    private BigInteger limSup;
+    private String tipo;
+}
