@@ -831,7 +831,7 @@ Por cada uno se requiere un guardado y eliminado, el mismo post puede servir com
   🚀 LISTO PARA COPIAR AL PROYECTO PRINCIPAL
 
   Todos los archivos están ubicados en:
-  C:\Users\USER\Desktop\SIAR-Back\app\
+  \app\
 
   Puedes copiar toda la estructura de carpetas app/ a tu proyecto principal de Spring Boot. Los imports están usando:
   - jakarta.persistence.* (Java 17 compatible)
@@ -846,14 +846,337 @@ Por cada uno se requiere un guardado y eliminado, el mismo post puede servir com
   - Driver JDBC de Oracle
 
 3.
-URL: /variables-riesgo
-get-post
-// Tabla CDDLAFT_PERFIL_TIPO_GRUPO_VARIABLE, CDDLAFT_PERFIL_TIPO_VARIABLE, CDDLAFT_PERFIL_GRUPO_VARIABLE
-onboarding-ongoing: {
-      porcentaje1: string,
-      porcentaje2: string,
-      fechaVigencia: date
-}
+📋 RESUMEN COMPLETO - API DE VARIABLES DE RIESGO
+  ✅ Implementación Completa y Lista para Usar
+  ---
+  📂 UBICACIÓN DE ARCHIVOS
+
+  Todos los archivos están en:
+  app\
+
+  1. Entidad JPA (app/Entity/cdd/)
+
+  Archivo: VariablesRiesgoEntity.java
+  - Tabla: CDDLAFT_PERFIL_VARIABLES_RIESGO
+  - Schema: CDDLAFT
+  - ID: Long (auto-generado con @GeneratedValue)
+
+  Campos de Negocio:
+  - porcentaje1: String (length 50)
+  - porcentaje2: String (length 50)
+  - fechaVigencia: LocalDate (not null)
+
+  Campos de Auditoría:
+  - fechaCreacion: LocalDateTime (not null)
+  - usuarioCreacion: String (not null, length 100)
+  - fechaUltimaModificacion: LocalDateTime
+  - usuarioUltimaModificacion: String (length 100)
+
+  ---
+  2. DTOs (app/dto/cdd/)
+
+  VariablesRiesgoDTO.java - DTO completo
+  - Incluye: id, porcentaje1, porcentaje2, fechaVigencia
+  - Incluye campos de auditoría completos
+
+  VariablesRiesgoRequest.java - Para POST
+  - Campos: porcentaje1, porcentaje2, fechaVigencia
+  - Sin ID, sin campos de auditoría
+
+  VariablesRiesgoResponse.java - Para respuestas
+  - Incluye: id, porcentaje1, porcentaje2, fechaVigencia
+  - Incluye: mensaje (String)
+  - Incluye campos de auditoría completos
+
+  ---
+  3. Mapper (app/mapper/cdd/)
+
+  Archivo: VariablesRiesgoMapper.java
+
+  Métodos implementados:
+  1. toEntity(Request) - Convierte Request → Entity (para crear)
+  2. toResponse(Entity) - Convierte Entity → Response (para responder)
+  3. updateEntityFromRequest(Request, Entity) - Actualiza Entity desde Request
+  4. toEntityFromDTO(DTO) - Convierte DTO → Entity
+  5. toDTO(Entity) - Convierte Entity → DTO
+
+  ---
+  4. Repository (app/repository/cdd/)
+
+  Archivo: VariablesRiesgoRepository.java
+  - Interfaz que extiende JpaRepository<VariablesRiesgoEntity, Long>
+  - Proporciona métodos CRUD automáticos
+
+  ---
+  5. Servicio (app/service/cdd/)
+
+  Archivo: VariablesRiesgoService.java
+
+  Métodos implementados:
+  1. guardar(request) - Crea nuevo registro con auditoría automática
+  2. listar() - Lista todos los registros
+  3. obtenerPorId(id) - Obtiene un registro por ID
+
+  Características:
+  - Gestión automática de auditoría (usuario y fecha de creación)
+  - Transacciones con @Transactional
+  - Obtiene usuario desde Spring Security Context
+  - Fallback a "SYSTEM" si no hay usuario autenticado
+  - Validación con IllegalArgumentException
+
+  ---
+  6. Controlador (app/controller/cdd/)
+
+  Archivo: VariablesRiesgoController.java
+  - Base URL: /variables-riesgo
+  - Anotado con @RestController
+
+  ---
+  🌐 ENDPOINTS IMPLEMENTADOS (3 endpoints)
+
+  1. POST /variables-riesgo
+
+  Descripción: Guardar nuevas Variables de Riesgo
+
+  Request Body: VariablesRiesgoRequest
+  {
+    "porcentaje1": "20",
+    "porcentaje2": "80",
+    "fechaVigencia": "2025-01-01"
+  }
+
+  Response: VariablesRiesgoResponse (HTTP 201 CREATED)
+  {
+    "id": 1,
+    "porcentaje1": "20",
+    "porcentaje2": "80",
+    "fechaVigencia": "2025-01-01",
+    "mensaje": "Variables de Riesgo guardadas exitosamente",
+    "fechaCreacion": "2025-12-21T11:30:00",
+    "usuarioCreacion": "admin",
+    "fechaUltimaModificacion": null,
+    "usuarioUltimaModificacion": null
+  }
+
+  ---
+  2. GET /variables-riesgo
+
+  Descripción: Listar todas las Variables de Riesgo
+
+  Response: List<VariablesRiesgoResponse> (HTTP 200 OK)
+  [
+    {
+      "id": 1,
+      "porcentaje1": "20",
+      "porcentaje2": "80",
+      "fechaVigencia": "2025-01-01",
+      "fechaCreacion": "2025-12-21T11:30:00",
+      "usuarioCreacion": "admin",
+      "fechaUltimaModificacion": null,
+      "usuarioUltimaModificacion": null
+    },
+    {
+      "id": 2,
+      "porcentaje1": "30",
+      "porcentaje2": "70",
+      "fechaVigencia": "2025-02-01",
+      "fechaCreacion": "2025-12-21T12:00:00",
+      "usuarioCreacion": "admin",
+      "fechaUltimaModificacion": null,
+      "usuarioUltimaModificacion": null
+    }
+  ]
+
+  ---
+  3. GET /variables-riesgo/{id}
+
+  Descripción: Obtener Variables de Riesgo por ID
+
+  Path Parameter: id (Long)
+
+  Response: VariablesRiesgoResponse (HTTP 200 OK)
+  {
+    "id": 1,
+    "porcentaje1": "20",
+    "porcentaje2": "80",
+    "fechaVigencia": "2025-01-01",
+    "fechaCreacion": "2025-12-21T11:30:00",
+    "usuarioCreacion": "admin",
+    "fechaUltimaModificacion": null,
+    "usuarioUltimaModificacion": null
+  }
+
+  Error Response: (HTTP 500 si no existe)
+  {
+    "error": "IllegalArgumentException: No existe registro con id: 999"
+  }
+
+  ---
+  🔧 ARQUITECTURA Y FLUJO
+
+  Cliente HTTP
+      ↓
+  VariablesRiesgoController (@RestController /variables-riesgo)
+      ↓
+  VariablesRiesgoService (@Service)
+      ├── Gestión de auditoría automática
+      └── Transacciones (@Transactional)
+      ↓
+  VariablesRiesgoMapper (@Component)
+      ├── Request → Entity
+      └── Entity → Response
+      ↓
+  VariablesRiesgoRepository (@Repository)
+      └── JpaRepository<VariablesRiesgoEntity, Long>
+      ↓
+  Base de Datos Oracle
+      └── CDDLAFT.CDDLAFT_PERFIL_VARIABLES_RIESGO
+
+  Flujo de Petición POST /variables-riesgo:
+
+  1. Controller recibe VariablesRiesgoRequest
+  2. Service llama a Mapper.toEntity(request)
+  3. Service establece auditoría:
+    - fechaCreacion = LocalDateTime.now()
+    - usuarioCreacion = currentUser() (desde Spring Security)
+  4. Repository guarda Entity en BD con save(entity)
+  5. Service llama a Mapper.toResponse(savedEntity)
+  6. Service agrega mensaje: "Variables de Riesgo guardadas exitosamente"
+  7. Controller devuelve Response con HTTP 201 CREATED
+
+  Flujo de Petición GET /variables-riesgo:
+
+  1. Controller llama a service.listar()
+  2. Service llama a repository.findAll()
+  3. Repository ejecuta query SQL: SELECT * FROM CDDLAFT_PERFIL_VARIABLES_RIESGO
+  4. Service convierte cada Entity a Response usando Stream y Mapper
+  5. Controller devuelve List<Response> con HTTP 200 OK
+
+  Flujo de Petición GET /variables-riesgo/{id}:
+
+  1. Controller recibe id como Path Variable
+  2. Service llama a repository.findById(id)
+  3. Repository ejecuta query SQL: SELECT * FROM ... WHERE ID = ?
+  4. Si existe: Mapper convierte Entity → Response
+  5. Si no existe: Lanza IllegalArgumentException
+  6. Controller devuelve Response con HTTP 200 OK
+
+  ---
+  ✅ CARACTERÍSTICAS IMPLEMENTADAS
+
+  1. Auditoría Automática
+    - Tracking de usuario y fecha de creación
+    - Usuario obtenido desde Spring Security Context
+  2. Transacciones
+    - Método guardar() usa @Transactional
+    - Rollback automático en caso de error
+  3. Validación
+    - Lanza IllegalArgumentException si no encuentra registro por ID
+    - Manejo de entidades nulas en Mapper
+  4. Seguridad
+    - Integración con Spring Security
+    - Obtiene usuario autenticado actual
+    - Fallback a "SYSTEM" si no hay autenticación
+  5. Separación de Responsabilidades
+    - Patrón MVC + Repository
+    - DTOs separados para Request/Response
+    - Mappers independientes
+  6. Compatibilidad Java 17
+    - Uso de jakarta.persistence.* (no javax.persistence)
+    - Uso de tipos modernos: LocalDate, LocalDateTime
+
+  ---
+  📦 RESUMEN DE ARCHIVOS CREADOS
+
+  | Tipo         | Archivo                        | Ubicación           |
+  |--------------|--------------------------------|---------------------|
+  | Entity       | VariablesRiesgoEntity.java     | app/Entity/cdd/     |
+  | DTO Simple   | VariablesRiesgoDTO.java        | app/dto/cdd/        |
+  | DTO Request  | VariablesRiesgoRequest.java    | app/dto/cdd/        |
+  | DTO Response | VariablesRiesgoResponse.java   | app/dto/cdd/        |
+  | Mapper       | VariablesRiesgoMapper.java     | app/mapper/cdd/     |
+  | Repository   | VariablesRiesgoRepository.java | app/repository/cdd/ |
+  | Service      | VariablesRiesgoService.java    | app/service/cdd/    |
+  | Controller   | VariablesRiesgoController.java | app/controller/cdd/ |
+  | TOTAL        | 8 archivos                     |                     |
+
+  ---
+  🚀 LISTO PARA COPIAR AL PROYECTO PRINCIPAL
+
+  Imports utilizados (Java 17 compatible):
+
+  // JPA
+  import jakarta.persistence.*;
+
+  // Spring
+  import org.springframework.stereotype.Service;
+  import org.springframework.stereotype.Repository;
+  import org.springframework.stereotype.Component;
+  import org.springframework.web.bind.annotation.*;
+  import org.springframework.http.ResponseEntity;
+  import org.springframework.http.HttpStatus;
+  import org.springframework.transaction.annotation.Transactional;
+  import org.springframework.security.core.Authentication;
+  import org.springframework.security.core.context.SecurityContextHolder;
+  import org.springframework.data.jpa.repository.JpaRepository;
+
+  // Java
+  import java.time.LocalDate;
+  import java.time.LocalDateTime;
+  import java.util.List;
+  import java.util.stream.Collectors;
+
+  Dependencias necesarias en el proyecto principal:
+
+  <!-- pom.xml -->
+  <dependencies>
+      <!-- Spring Boot Starter Web -->
+      <dependency>
+          <groupId>org.springframework.boot</groupId>
+          <artifactId>spring-boot-starter-web</artifactId>
+      </dependency>
+
+      <!-- Spring Boot Starter Data JPA -->
+      <dependency>
+          <groupId>org.springframework.boot</groupId>
+          <artifactId>spring-boot-starter-data-jpa</artifactId>
+      </dependency>
+
+      <!-- Spring Boot Starter Security -->
+      <dependency>
+          <groupId>org.springframework.boot</groupId>
+          <artifactId>spring-boot-starter-security</artifactId>
+      </dependency>
+
+      <!-- Oracle JDBC Driver -->
+      <dependency>
+          <groupId>com.oracle.database.jdbc</groupId>
+          <artifactId>ojdbc8</artifactId>
+          <scope>runtime</scope>
+      </dependency>
+  </dependencies>
+
+  ---
+  📝 NOTAS IMPORTANTES
+
+  1. Tabla de Base de Datos: Asegúrate de que exista la tabla CDDLAFT.CDDLAFT_PERFIL_VARIABLES_RIESGO con las columnas correspondientes.
+  2. Configuración Spring Boot: Verifica que application.properties tenga la configuración de Oracle:
+  spring.datasource.url=jdbc:oracle:thin:@localhost:1521:ORCL
+  spring.datasource.username=${DB_USERNAME}
+  spring.datasource.password=${DB_PASSWORD}
+  spring.jpa.hibernate.ddl-auto=validate
+  3. Diferencia con el README: El README menciona las tablas:
+    - CDDLAFT_PERFIL_TIPO_GRUPO_VARIABLE
+    - CDDLAFT_PERFIL_TIPO_VARIABLE
+    - CDDLAFT_PERFIL_GRUPO_VARIABLE
+
+  Pero la implementación usa: CDDLAFT_PERFIL_VARIABLES_RIESGO
+
+  Si necesitas mapear las otras tablas, serían entidades adicionales separadas.
+  4. Solo POST, no PUT: El servicio solo implementa creación (POST), no actualización (PUT). Si necesitas actualización, puedo agregar ese endpoint.
+
+  ---
+  La API está completamente funcional y lista para copiar al proyecto principal.
 4.
 URL: /riesgo-total
 get-post-delete
@@ -894,3 +1217,99 @@ id:{
     }...
 }
  
+
+
+Como implementar los repository en ves de DAO:
+CÓMO SE USAN EN LOS SERVICIOS
+
+  En VariablesRiesgoService:
+
+  @Service
+  public class VariablesRiesgoService {
+
+      private final VariablesRiesgoRepository variablesRiesgoRepository; // ← DAO inyectado
+
+      public VariablesRiesgoService(VariablesRiesgoRepository variablesRiesgoRepository) {
+          this.variablesRiesgoRepository = variablesRiesgoRepository; // Inyección por constructor
+      }
+
+      @Transactional
+      public VariablesRiesgoResponse guardar(VariablesRiesgoRequest request) {
+          // Usar el Repository (DAO)
+          VariablesRiesgoEntity savedEntity = variablesRiesgoRepository.save(entity); // ← Llamada al DAO
+          return response;
+      }
+
+      public List<VariablesRiesgoResponse> listar() {
+          List<VariablesRiesgoEntity> entities = variablesRiesgoRepository.findAll(); // ← Llamada al DAO
+          return entities.stream()...
+      }
+
+      public VariablesRiesgoResponse obtenerPorId(Long id) {
+          VariablesRiesgoEntity entity = variablesRiesgoRepository.findById(id) // ← Llamada al DAO
+              .orElseThrow(() -> new IllegalArgumentException("No existe..."));
+          return mapper.toResponse(entity);
+      }
+  }
+
+  En RiesgoService:
+
+  @Service
+  public class RiesgoService {
+
+      private final RiesgoPersonaNaturalRepository personaNaturalRepository; // ← DAO 1
+      private final RiesgoPersonaJuridicaRepository personaJuridicaRepository; // ← DAO 2
+
+      public RiesgoService(
+              RiesgoPersonaNaturalRepository personaNaturalRepository,
+              RiesgoPersonaJuridicaRepository personaJuridicaRepository
+      ) {
+          this.personaNaturalRepository = personaNaturalRepository;
+          this.personaJuridicaRepository = personaJuridicaRepository;
+      }
+
+      // Uso de DAO para Persona Natural
+      @Transactional
+      public RiesgoPersonaNaturalResponse guardarPersonaNatural(RiesgoPersonaNaturalRequest request) {
+          RiesgoPersonaNaturalEntity savedEntity = personaNaturalRepository.save(entity); // ← DAO
+          return response;
+      }
+
+      // Uso de DAO para Persona Jurídica
+      @Transactional
+      public RiesgoPersonaJuridicaResponse guardarPersonaJuridica(RiesgoPersonaJuridicaRequest request) {
+          RiesgoPersonaJuridicaEntity savedEntity = personaJuridicaRepository.save(entity); // ← DAO
+          return response;
+      }
+  }
+
+  ---
+  📋 RESUMEN
+
+  | API Module              | DAO/Repository                  | Ubicación           | Estado    |
+  |-------------------------|---------------------------------|---------------------|-----------|
+  | Variables de Riesgo     | VariablesRiesgoRepository       | app/repository/cdd/ | ✅ Creado |
+  | Riesgo Persona Natural  | RiesgoPersonaNaturalRepository  | app/repository/cdd/ | ✅ Creado |
+  | Riesgo Persona Jurídica | RiesgoPersonaJuridicaRepository | app/repository/cdd/ | ✅ Creado |
+
+  Todos los DAO (Repositories) están creados y funcionando correctamente.
+
+  ---
+  🎯 ¿NECESITAS QUERIES PERSONALIZADAS?
+
+  Si necesitas queries más complejas, puedes agregarlas directamente en los Repositories:
+
+  @Repository
+  public interface VariablesRiesgoRepository extends JpaRepository<VariablesRiesgoEntity, Long> {
+
+      // Query derivada por nombre de método
+      List<VariablesRiesgoEntity> findByFechaVigencia(LocalDate fecha);
+
+      // Query con @Query personalizada
+      @Query("SELECT v FROM VariablesRiesgoEntity v WHERE v.porcentaje1 = :porcentaje")
+      List<VariablesRiesgoEntity> buscarPorPorcentaje1(@Param("porcentaje") String porcentaje);
+
+      // Query nativa SQL
+      @Query(value = "SELECT * FROM CDDLAFT_PERFIL_VARIABLES_RIESGO WHERE PORCENTAJE2 > :valor", nativeQuery = true)
+      List<VariablesRiesgoEntity> buscarPorPorcentaje2Mayor(@Param("valor") String valor);
+  }
