@@ -1,3 +1,5 @@
+fPSJzaT4ng8iCtCAQqhIF95XlCnVdoNX5iSIkHZZANS81xxN#mN_2vFdwprtDr2YHXotIIWx4227tT2_EaKsjQ3jMo68
+
 
 https://claude.ai/oauth/authorize?code=true&client_id=9d1c250a-e61b-44d9-88ed-5944d1962f5e&response_type=code&scope=user%3Aprofile+user%3Ainference+user%3Asessions%3Aclaude_code&code_challenge=TK-s9Ma6KEhYebL-o-jAfgIvdWHW8aGH13y7d8dRnPI&code_challenge_method=S256&state=mN_2vFdwprtDr2YHXotIIWx4227tT2_EaKsjQ3jMo68&redirect_uri=https%3A%2F%2Fconsole.anthropic.com%2Foauth%2Fcode%2Fcallback
 
