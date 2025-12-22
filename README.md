@@ -1,3 +1,15 @@
+curl --ssl-no-revoke https://api.anthropic.com/v1/messages ^
+  -H "x-api-key: TU_LLAVE_AQUI" ^
+  -H "anthropic-version: 2023-06-01" ^
+  -H "content-type: application/json" ^
+  -d "{\"model\": \"claude-3-haiku-20240307\", \"max_tokens\": 10, \"messages\": [{\"role\": \"user\", \"content\": \"hola\"}]}"
+
+
+
+
+
+-----
+
 curl --ssl-no-revoke https://api.anthropic.com/v1/messages \
      --header "x-api-key: TU_KEY" \
      --header "anthropic-version: 2023-06-01" \
