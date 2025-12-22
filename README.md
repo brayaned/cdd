@@ -1,3 +1,7 @@
+"terminal.integrated.env.windows": {
+  "CURL_SSL_BACKEND": "openssl",
+  "NODE_TLS_REJECT_UNAUTHORIZED": "0"
+}
 
 
 echo %ANTHROPIC_API_KEY%
