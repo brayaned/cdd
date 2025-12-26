@@ -1,3 +1,7 @@
+https://github.com/santander-group-bnc-gln/bnc-bsn023-siarbackendj
+https://github.com/santander-group-bnc-gln/bnc-bsn023-siarfrontend
+https://github.com/santander-group-bnc-gln/bnc-bsn023-cddnivelriesgo -->> api para el servicio de calculo de nivel de riesgo
+
 https://teams.microsoft.com/l/meetup-join/19%3ameeting_MzAzN2M0MTAtMDkxNS00MzAyLWIzNzktNDVkMGE0NzY0NzYx%40thread.v2/0?context=%7b%22Tid%22%3a%2235595a02-4d6d-44ac-99e1-f9ab4cd872db%22%2c%22Oid%22%3a%2257dbd4af-7422-4d95-a998-95526de057c9%22%7d
 
 
