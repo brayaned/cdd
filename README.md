@@ -1,3 +1,7 @@
+https://teams.microsoft.com/l/meetup-join/19%3ameeting_MzAzN2M0MTAtMDkxNS00MzAyLWIzNzktNDVkMGE0NzY0NzYx%40thread.v2/0?context=%7b%22Tid%22%3a%2235595a02-4d6d-44ac-99e1-f9ab4cd872db%22%2c%22Oid%22%3a%2257dbd4af-7422-4d95-a998-95526de057c9%22%7d
+
+
+
 // A partir de este DTO crea un request y response (el response solo para indicar que la operacion de guardado se realizo correctamente)
 // Ten en cuenta realizar el mapper para el request con el dto y lo mismo para la respuesta
 // Crea el controlador RiesgoController si no existe con las peticiones rest para guardar y consultar esta informacion que esta en el DTO
